@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/tryhackme/first-shift/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/tryhackme/first-shift/task-3-probably-just-fine/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/tryhackme/first-shift/task-4-phishing-books/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/tryhackme/first-shift/task-5-Portal-Drop/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/tryhackme/first-shift/task-6-Zero-Tolerance/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/tryhackme/first-shift/task-7-The-Crown-Jewel/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+    <url>
+         <loc>https://vishak-SOC.github.io/security-writeups/tryhackme/first-shift/task-8-Promotion-Night/</loc>
+         <lastmod>2026-02-05</lastmod>
+    </url>
+</urlset>
