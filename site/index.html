@@ -6,11 +6,11 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="SOC-style investigation writeups (Splunk, Wireshark, DFIR notes)">
+        <meta name="description" content="A portfolio of SOC-style security investigations, featuring full kill-chain analysis and network forensics.">
       
       
       
-        <link rel="canonical" href="https://YOUR_GITHUB_USERNAME.github.io/security-writeups/">
+        <link rel="canonical" href="https://vishak-SOC.github.io/security-writeups/">
       
       
       
@@ -69,11 +69,6 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
-        
-        <a href="#latest-writeups" class="md-skip">
-          Skip to content
-        </a>
-      
     </div>
     <div data-md-component="announce">
       
@@ -82,7 +77,9 @@
     
       
 
-<header class="md-header" data-md-component="header">
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="." title="Security Writeups" class="md-header__button md-logo" aria-label="Security Writeups" data-md-component="logo">
       
@@ -187,14 +184,8 @@
     
   </nav>
   
-</header>
     
-    <div class="md-container" data-md-component="container">
       
-      
-        
-          
-            
 <nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
   <div class="md-grid">
     <ul class="md-tabs__list">
@@ -203,24 +194,10 @@
   
   
   
-    
-  
-  
-    <li class="md-tabs__item md-tabs__item--active">
-      <a href="." class="md-tabs__link">
-        
-  
   
     
-  
-  Home
-
-      </a>
-    </li>
-  
-
+    
       
-        
   
   
   
@@ -228,14 +205,17 @@
     
     
       <li class="md-tabs__item">
-        <a href="tryhackme/first-shift.md" class="md-tabs__link">
+        <a href="tryhackme/first-shift/" class="md-tabs__link">
           
   
   
-  TryHackMe
+  Investigations
 
         </a>
       </li>
+    
+  
+
     
   
 
@@ -243,13 +223,21 @@
     </ul>
   </div>
 </nav>
-          
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
         
       
       <main class="md-main" data-md-component="main">
         <div class="md-main__inner md-grid">
           
             
+              
+                
               
               <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
                 <div class="md-sidebar__scrollwrap">
@@ -277,24 +265,33 @@
       
   
   
+  
+  
     
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+    
+    
+    
       
       
+        
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
           
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
     
   
-    Home
+    Investigations
   
 
     
@@ -302,104 +299,22 @@
   
   
 
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="." class="md-nav__link md-nav__link--active">
+            <span class="md-nav__icon md-icon"></span>
+          </label>
         
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            
   
-  
-  <span class="md-ellipsis">
-    
-  
-    Home
-  
-
-    
-  </span>
-  
+    Investigations
   
 
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#latest-writeups" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📌 Latest writeups
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#investigation-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🧠 Investigation workflow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tools-skills" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🧰 Tools &amp; skills
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#responsible-sharing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ✅ Responsible sharing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contact-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📬 Contact / links
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-    
-      
-      
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
   
   
   
@@ -418,17 +333,17 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_1" >
         
           
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_1_1" id="__nav_1_1_label" tabindex="0">
             
   
   
   <span class="md-ellipsis">
     
   
-    TryHackMe
+    First Shift (Case Study)
   
 
     
@@ -439,12 +354,12 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_1">
             <span class="md-nav__icon md-icon"></span>
             
   
-    TryHackMe
+    First Shift (Case Study)
   
 
           </label>
@@ -457,14 +372,14 @@
   
   
     <li class="md-nav__item">
-      <a href="tryhackme/first-shift.md" class="md-nav__link">
+      <a href="tryhackme/first-shift/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    First Shift
+    Dashboard
   
 
     
@@ -473,6 +388,182 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tryhackme/first-shift/task-3-probably-just-fine/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task 3 – Auth Triage
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tryhackme/first-shift/task-4-phishing-books/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task 4 – Phishing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tryhackme/first-shift/task-5-Portal-Drop/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task 5 – Portal Drop
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tryhackme/first-shift/task-6-Zero-Tolerance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task 6 – Zero Tolerance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tryhackme/first-shift/task-7-The-Crown-Jewel/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task 7 – Crown Jewel
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="tryhackme/first-shift/task-8-promotion-night.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Task 8 – Promotion Night
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -493,7 +584,9 @@
             
             
               
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" hidden>
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -502,69 +595,6 @@
   
   
   
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#latest-writeups" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📌 Latest writeups
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#investigation-workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🧠 Investigation workflow
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#tools-skills" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        🧰 Tools &amp; skills
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#responsible-sharing" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ✅ Responsible sharing
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#contact-links" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        📬 Contact / links
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -578,93 +608,256 @@
               <article class="md-content__inner md-typeset">
                 
                   
+  
 
 
 
-  <h1>Home</h1>
 
-<div class="soc-hero">
+<style>
+  .md-content__inner > h1 { display: none; }
 
-# 🛡️ Security Writeups
+  /* --- FUTURISTIC HERO SECTION --- */
+  .port-hero {
+    display: flex;
+    align-items: center;
+    gap: 50px;
+    padding: 80px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 40px;
+    position: relative;
+    /* Subtle Tech Background overlay */
+    background-image: 
+      radial-gradient(circle at 10% 20%, rgba(0, 210, 255, 0.08) 0%, transparent 40%),
+      linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 30px 100%; /* Vertical faint scanlines */
+  }
 
-<span class="soc-muted">
-SOC-style investigation writeups based on hands-on blue-team labs, with a focus on evidence, timelines, and detection logic using Splunk and Wireshark.
-</span>
+  /* --- CYBER AVATAR CONTAINER (STATIC) --- */
+  .cyber-avatar-ring {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    /* The neon gradient ring */
+    background: conic-gradient(from 0deg, transparent 0%, #00d2ff 20%, transparent 40%, #00d2ff 60%, transparent 80%);
+    /* animation: spin-glow 6s linear infinite; <--- DISABLED FOR STATIC LOOK */
+    padding: 4px; /* Thickness of the glowing ring */
+    box-shadow: 0 0 60px rgba(0, 210, 255, 0.3); /* Outer bloom */
+    flex-shrink: 0;
+  }
 
-<br><br>
+  /* The actual image wrapper */
+  .cyber-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #0b0f15; /* Dark backing */
+    border: 2px solid rgba(0, 210, 255, 0.6); /* Inner sharp rim */
+    position: relative;
+    z-index: 2; /* Sits on top of the glow */
+  }
 
-**What this site focuses on**
-- Investigation-driven writeups (not step-by-step answers)
-- Log and PCAP analysis with supporting screenshots
-- IOC extraction, hypotheses, and detection ideas
+  .cyber-avatar-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: contrast(110%); /* Pop the colors slightly */
+    transition: transform 0.4s ease;
+  }
+
+  /* Slight zoom effect on hover */
+  .cyber-avatar-ring:hover .cyber-avatar-img img {
+     transform: scale(1.08);
+  }
+
+  /* --- TYPOGRAPHY & BADGES --- */
+  .port-intro h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    margin: 0 0 15px 0;
+    /* Cyber gradient text */
+    background: linear-gradient(to right, #ffffff 20%, #00d2ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+    text-shadow: 0 0 30px rgba(0, 210, 255, 0.2);
+  }
+
+  .port-intro p {
+    font-size: 1.15rem;
+    opacity: 0.85;
+    max-width: 600px;
+    line-height: 1.7;
+    color: #cdd6f4;
+  }
+
+  .tech-stack {
+    display: flex;
+    gap: 12px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+  }
+
+  .tech-badge {
+    padding: 8px 18px;
+    background: rgba(0, 210, 255, 0.05);
+    border: 1px solid rgba(0, 210, 255, 0.2);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #00d2ff;
+    font-family: var(--mono-font);
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  .tech-badge:hover {
+      background: rgba(0, 210, 255, 0.15);
+      box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+  }
+
+  /* --- PROJECTS GRID --- */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 30px;
+    margin-top: 35px;
+  }
+
+  .project-card {
+    background: rgba(22, 27, 36, 0.8); /* Slightly transparent */
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    text-decoration: none !important;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+  }
+
+  .project-card:hover {
+    transform: translateY(-7px);
+    border-color: #00d2ff;
+    box-shadow: 0 10px 30px -10px rgba(0, 210, 255, 0.3);
+  }
+
+  /* Glowing line on hover */
+  .project-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: #00d2ff;
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+  }
+  .project-card:hover::after { transform: scaleX(1); }
+
+
+  .project-header {
+    height: 150px;
+    background: linear-gradient(135deg, rgba(0, 210, 255, 0.1), transparent 60%);
+    padding: 25px;
+    display: flex;
+    align-items: flex-end;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .project-body { padding: 25px; }
+
+  .project-title { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .project-meta { font-size: 0.85rem; color: #00d2ff; text-transform: uppercase; letter-spacing: 1.2px; margin-bottom: 12px; font-weight: 600; }
+  .project-desc { font-size: 0.95rem; opacity: 0.75; line-height: 1.6; margin-bottom: 25px; color: #cdd6f4; }
+
+  /* --- ENTRANCE ANIMATIONS --- */
+  .fade-up { opacity: 0; transform: translateY(30px); animation: fadeUpAnim 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+  .delay-1 { animation-delay: 0.2s; }
+  .delay-2 { animation-delay: 0.4s; }
+  @keyframes fadeUpAnim { to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 768px) {
+      .port-hero { flex-direction: column; text-align: center; padding: 50px 0; gap: 30px; }
+      .tech-stack { justify-content: center; }
+      .port-intro h1 { font-size: 2.5rem; }
+      .cyber-avatar-ring { width: 150px; height: 150px; }
+  }
+
+</style>
+
+<div class="port-hero fade-up">
+
+  <div class="cyber-avatar-ring">
+    <div class="cyber-avatar-img">
+        <img src="assets/profile.png" alt="Security Analyst Profile">
+    </div>
+  </div>
+
+  <div class="port-intro">
+    <h1>Security Analyst.</h1>
+    <p>
+      Specializing in <strong>SOC Operations</strong>, <strong>Threat Hunting</strong>, and <strong>Digital Forensics</strong>. 
+      Building defensive depth through evidence-based analysis and documenting the kill chain of simulated breaches.
+    </p>
+    <div class="tech-stack">
+      <span class="tech-badge">SEIM / Splunk</span>
+      <span class="tech-badge">Network Forensics</span>
+      <span class="tech-badge">EDR Analysis</span>
+      <span class="tech-badge">Incident Response</span>
+    </div>
+  </div>
+</div>
+
+<div class="fade-up delay-1">
+    <h2 style="border-bottom: none; font-size: 1.6rem; margin-bottom: 25px; letter-spacing: 1px;">
+        <span style="color: #00d2ff;">///</span> OPERATIONAL CASE FILES
+    </h2>
+</div>
+
+<div class="project-grid fade-up delay-2">
+
+  <a href="tryhackme/first-shift/" class="project-card">
+    <div class="project-header">
+      <div style="font-size: 2.5rem; opacity: 0.8;">🛡️</div>
+    </div>
+    <div class="project-body">
+      <div class="project-meta">TryHackMe • SOC Level 1</div>
+      <div class="project-title">Operation: First Shift</div>
+      <div class="project-desc">
+        A complete kill-chain investigation: investigating Phishing vectors, analyzing Web Shells, tracking Lateral Movement, and performing Cloud Forensics on AWS.
+      </div>
+      <div class="soc-pill-row">
+        <span class="soc-pill" style="border-color: #00d2ff; background: rgba(0,210,255,0.1);">Complete</span>
+        <span class="soc-pill">8 Tasks Executed</span>
+      </div>
+    </div>
+  </a>
+
+  <a href="#" class="project-card" style="opacity: 0.5; filter: grayscale(50%); cursor: default;">
+    <div class="project-header" style="background: linear-gradient(135deg, rgba(255, 80, 80, 0.1), transparent);">
+        <div style="font-size: 2.5rem; opacity: 0.5;">🔒</div>
+    </div>
+    <div class="project-body">
+      <div class="project-meta">Upcoming Operation</div>
+      <div class="project-title">Red Team Scenario</div>
+      <div class="project-desc">
+        Currently engaged in advanced adversary simulation. Detailed mission report pending declassification and analysis.
+      </div>
+      <div class="soc-pill-row">
+        <span class="soc-pill">Status: Classified</span>
+      </div>
+    </div>
+  </a>
 
 </div>
 
-<hr />
-<h2 id="latest-writeups">📌 <a href="TryHackMe/first-shift/">Latest writeups</a></h2>
-<div class="soc-grid">
-
-<div class="soc-card">
-
-<a href="tryhackme/first-shift/" class="soc-card-link">
-
-<div class="soc-card">
-
-First Shift – SOC Case Study
-
-SOC investigation using log and PCAP analysis to validate suspicious activity.
-
-<div class="soc-pill-row">
-  <span class="soc-pill">Splunk</span>
-  <span class="soc-pill">Wireshark</span>
-  <span class="soc-pill">SOC Triage</span>
-</div>
-
-</div>
-
-</a>
-
-</div>
-
-<div class="soc-card">
-
-**Next writeup (coming soon)**
-
-Additional rooms and case studies will be added as the reporting style and detection depth continue to evolve.
-
-<span class="soc-pill">Detection</span>
-<span class="soc-pill">DFIR Notes</span>
-<span class="soc-pill">IOCs</span>
-
-</div>
-
-</div>
-
-<hr />
-<h2 id="investigation-workflow">🧠 Investigation workflow</h2>
-<ol>
-<li><strong>Scope the data</strong> — logs, PCAPs, and timestamps  </li>
-<li><strong>Build a timeline</strong> — what happened first through last  </li>
-<li><strong>Validate hypotheses</strong> — Splunk searches and packet inspection  </li>
-<li><strong>Extract IOCs</strong> — IPs, domains, user agents where applicable  </li>
-<li><strong>Detection ideas</strong> — how this would be caught in a real SOC  </li>
-</ol>
-<hr />
-<h2 id="tools-skills">🧰 Tools &amp; skills</h2>
-<ul>
-<li><strong>SIEM / log analysis:</strong> Splunk (search, stats, pivots)</li>
-<li><strong>Network analysis:</strong> Wireshark (filters, protocol inspection)</li>
-<li><strong>Reporting:</strong> structured writeups with evidence and reasoning</li>
-</ul>
-<hr />
-<h2 id="responsible-sharing">✅ Responsible sharing</h2>
-<p>These writeups avoid publishing flags or sensitive spoilers and focus on <strong>methodology, evidence, and detection thinking</strong>.</p>
-<hr />
-<h2 id="contact-links">📬 Contact / links</h2>
-<p>(Add when ready)
-- TryHackMe
-- GitHub
-- LinkedIn</p>
+<p><br><br><br></p>
+<center style="opacity: 0.4; font-size: 0.8rem; font-family: var(--mono-font);">
+  SYSTEM ID: SEC-PORTFOLIO-v2.1 // EST. 2025
+</center>
 
 
 
@@ -672,8 +865,13 @@ Additional rooms and case studies will be added as the reporting style and detec
 
 
 
+  
+  
 
 
+
+
+  
 
 
 
@@ -722,7 +920,7 @@ Additional rooms and case studies will be added as the reporting style and detec
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "navigation.tabs", "navigation.top", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy", "search.suggest", "search.highlight"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.instant", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.sections", "navigation.footer", "toc.follow", "content.code.copy", "search.suggest", "search.highlight"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
       <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
