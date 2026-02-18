@@ -108,7 +108,7 @@ Once established, the attacker used "Living off the Land" techniques to scan the
     
     The persistence mechanism was disguised as a legitimate "LanguageSync" task executing a DLL.
     
-    ![Task XML](../assets/task-8/task-8-9.png)
+    ![Task XML](./assets/task-8/task-8-9.png)
 
 === "4. Task Creation Log"
     **Event ID 4698:**

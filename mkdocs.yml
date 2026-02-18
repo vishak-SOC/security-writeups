@@ -62,3 +62,12 @@ nav:
           - Task 6 – Zero Tolerance: tryhackme/first-shift/task-6-Zero-Tolerance.md
           - Task 7 – Crown Jewel: tryhackme/first-shift/task-7-The-Crown-Jewel.md
           - Task 8 – Promotion Night: tryhackme/first-shift/task-8-Promotion-Night.md
+
+  - Honeynet Collapse (Ransomware):
+          - Dashboard: tryhackme/honeynet-collapse/index.md
+          - Task 1 Initial Access: tryhackme/honeynet-collapse/task-1-initial-access.md
+          - Task 2 Windows Triage: tryhackme/honeynet-collapse/task-2-windows-movement.md
+          - Task 3 Memory Forensics: tryhackme/honeynet-collapse/task-3-memory-forensics.md
+          - Task 4 Disk Analysis: tryhackme/honeynet-collapse/task-4-disk-forensics.md
+          - Task 5 File System: tryhackme/honeynet-collapse/task-5-file-system.md
+          - Task 6 MacOS Forensics: tryhackme/honeynet-collapse/task-6-macos.md
