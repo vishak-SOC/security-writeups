@@ -17,17 +17,6 @@ hide:
   .md-main { background: #050505; }
   .md-content { background: transparent; }
 
-  /* CRT Scanline Overlay */
-  body::before {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0; left: 0; bottom: 0; right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-    z-index: 999;
-    background-size: 100% 2px, 3px 100%;
-    pointer-events: none; /* Allows clicking through the overlay */
-  }
 
   /* --- 2. HERO SECTION --- */
   .port-hero {
@@ -288,11 +277,11 @@ hide:
       <div class="project-meta">TryHackMe • SOC Level 1</div>
       <div class="project-title">Operation: First Shift</div>
       <div class="project-desc">
-        A complete kill-chain investigation: analyzing Phishing vectors, Web Shells, tracking Lateral Movement, and performing Cloud Forensics on AWS.
+        A full kill-chain investigation: phishing, web shells, lateral movement, ransomware and AWS cloud forensics, with detection queries for every stage.
       </div>
       <div class="soc-pill-row">
         <span class="soc-pill pill-cyan">Complete</span>
-        <span class="soc-pill">8 Tasks Executed</span>
+        <span class="soc-pill">6 Investigations</span>
       </div>
     </div>
   </a>
@@ -307,11 +296,11 @@ hide:
       <div class="project-meta" style="color: #f97316;">Incident Response • Forensics</div>
       <div class="project-title">Operation: Honeynet Collapse</div>
       <div class="project-desc">
-        Multi-OS Ransomware Investigation. Analyzed Linux, Windows, and macOS endpoints to reconstruct the attack timeline and identify exfiltrated data.
+        Multi-OS ransomware investigation across Linux, Windows and macOS: reconstructing the attack timeline, the stolen data and the detections that would have caught it.
       </div>
       <div class="soc-pill-row">
         <span class="soc-pill pill-orange">Complete</span>
-        <span class="soc-pill">6 Phases Analyzed</span>
+        <span class="soc-pill">6 Investigations</span>
       </div>
     </div>
   </a>

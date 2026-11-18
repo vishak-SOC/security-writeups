@@ -165,9 +165,9 @@ hide:
   </div>
   <p class="briefing-text">
     A sophisticated ransomware campaign has successfully targeted the DeceptiTech corporate network. 
-    As the lead <b>Senior Forensic Analyst</b>, your objective is to reconstruct the multi-stage 
-    attack chain involving unauthorized <b>Linux SSH access</b>, lateral movement into <b>Windows DC</b>, 
-    and final <b>macOS exfiltration</b>.
+    As the <b>forensic analyst</b>, my objective was to reconstruct the multi-stage attack chain: 
+    a <b>WordPress brute force</b> on a Linux server, <b>lateral movement into Windows</b>, 
+    data theft, ransomware, and <b>macOS exfiltration</b>.
   </p>
   <div class="status-line">
     <span></span>

@@ -10,21 +10,27 @@ hide:
 <div class="soc-pill-row" style="margin-bottom: 1.2rem;">
   <span class="soc-pill">Alert: Ransomware</span>
   <span class="soc-pill">Tactic: Cloud Pivot</span>
-  <span class="soc-pill">Actor: BabyLockerKZ</span>
+  <span class="soc-pill">Ransomware: BabyLockerKZ</span>
 </div>
 
 <span class="soc-muted">
-The final investigation. The adversary deployed ransomware on-premise, established persistence via scheduled tasks, and pivoted to the cloud to wipe critical backups.
+The final investigation. The attacker deployed ransomware on-premises, kept access through a scheduled task and a Run key, then used stolen AWS keys to steal backups from S3.
 </span>
 
 </div>
 
+!!! abstract "Summary"
+    **What happened:** `gaze.exe` was copied from the domain controller's SYSVOL share and run, encrypting files to `.danger17` and wiping free space with `cipher /w`. The attacker scanned `SRV-ITFS`, set up persistence, read `cloud-keys.csv`, logged in to AWS from `152.42.128.207`, downloaded two backup archives and left `YOU-HAVE-BEEN-PWNED.txt` in the bucket.
+
+    **Impact:** On-premises files encrypted; cloud backups stolen (double extortion).
+
+    **Key IOCs:** `gaze.exe` (MD5 `8BA3A306F5550374490030EA472F2F92`) · `.danger17` · `ruche.dll` · task `LanguageSync` · `152.42.128.207`
+
 !!! failure "🚨 Critical Incident: Full Compromise"
-    **Impact:** On-Premise Ransomware + AWS Data Destruction
-    **Attacker C2:** Cobalt Strike
+    **Impact:** On-premises ransomware + theft of AWS backups
     **Ransom Extension:** `.danger17`
     
-    **Narrative:** The attacker used `gaze.exe` to encrypt local files, then abused WMI for lateral movement. They located a CSV file containing AWS keys, allowed them to pivot to the cloud, steal data, and upload a ransom note.
+    **Narrative:** The attacker used `gaze.exe` to encrypt local files, then abused WMI for lateral movement. They then found a CSV file containing AWS keys, which let them pivot to the cloud, steal data and upload a ransom note.
 
 ---
 
@@ -45,12 +51,14 @@ The attack began with the execution of a binary named `gaze.exe`, which propagat
 === "2. Encryption Behavior"
     **Artifacts:** Files were encrypted with the extension `.danger17`.
     
-    **Anti-Forensics:** We observed `cipher.exe /w` being used to wipe free space, making recovery impossible.
+    **Anti-Forensics:** I saw `cipher.exe /w` used to overwrite free disk space, so deleted original files cannot be recovered.
     
     ![Encryption](./assets/task-8/task-8-5.png)
 
 === "3. Persistence"
-    **Registry Key:** `BabyLockerKZ`
+    **Registry Value:** `BabyLockerKZ`
+
+    BabyLockerKZ is the name public reporting (Cisco Talos) gives to a variant of the **MedusaLocker** ransomware family.
     
     The malware created a registry run key to ensure it executes on every reboot.
     
@@ -67,19 +75,21 @@ The attack began with the execution of a binary named `gaze.exe`, which propagat
 
 ## 🔬 Phase 2: Malware Analysis (IOCs)
 
-We isolated the malware sample to extract Indicators of Compromise.
+I pulled the sample's hashes from Sysmon process-creation logs (Event ID 1).
 
 === "1. Hash Analysis"
-    **MD5 Hash:** `27B0D51406B5360B49D968D69DF0F3E6`
-    
-    **Attribution:** This hash is linked to **Cobalt Strike** initial shellcode.
+    **File:** `C:\Windows\Temp\gaze.exe` (run by `DECEPT\eric.portman` on `SRV-JMP`)
+
+    * **MD5:** `8BA3A306F5550374490030EA472F2F92`
+    * **SHA256:** `6D000A159FE10AF1B29DDF4E4015931A9E9D0A020AEEF0C602D8C5419B5966E6`
+    * **Imphash:** `1CC690A422707DB94DD0913CD9980C27`
     
     ![MD5 Hash](./assets/task-8/task-8-4.png)
 
 === "2. Cipher Command"
     **Command:** `cipher /w:\\?\C:`
     
-    This command overwrites deleted data on the C: drive to prevent forensic recovery.
+    This overwrites the free space on C:, destroying deleted files so investigators cannot recover the unencrypted originals.
     
     ![Cipher](./assets/task-8/task-8-1.png)
 
@@ -87,7 +97,7 @@ We isolated the malware sample to extract Indicators of Compromise.
 
 ## 🕷️ Phase 3: Lateral Movement & Persistence
 
-Once established, the attacker used "Living off the Land" techniques to scan the network and maintain access.
+Once inside, the attacker used living-off-the-land techniques to scan the network and maintain access.
 
 === "1. WMI Scanning"
     **Technique:** T1047 (Windows Management Instrumentation)
@@ -132,7 +142,7 @@ The most critical moment occurred when the attacker found a file containing clea
 === "2. AWS Access"
     **Source IP:** `152.42.128.207`
     
-    Shortly after reading the CSV, we detected a login to the AWS environment from this external IP.
+    Shortly after the CSV was read, I found a login to the AWS environment from this external IP.
     
     ![AWS IP](./assets/task-8/task-8-12.png)
 
@@ -149,29 +159,73 @@ With AWS access, the attacker stole critical data and left a message.
     
     ![AWS Exfil](./assets/task-8/task-8-13.png)
 
-=== "2. Defacement"
+=== "2. Ransom Note"
     **Message:** `YOU-HAVE-BEEN-PWNED.txt`
     
-    The attacker uploaded this text file to the S3 bucket to confirm the breach.
+    The attacker uploaded this note to the S3 bucket to prove access and pressure the victim.
     
     ![Defacement](./assets/task-8/task-8-14.png)
 
 ---
 
+## 🔔 Detection Opportunities
+
+!!! example "Detections I would add"
+    These are example queries; index and field names depend on your environment.
+
+    === "Free-space wipe"
+        ```yaml
+        title: Cipher used to wipe free space
+        logsource: { product: windows, category: process_creation }
+        detection:
+          selection:
+            Image|endswith: '\cipher.exe'
+            CommandLine|contains: '/w'
+          condition: selection
+        level: high
+        ```
+        Legitimate use is rare; during an incident this is a strong ransomware signal.
+
+    === "Executable copied from SYSVOL"
+        ```spl
+        index=sysmon EventCode=1 CommandLine="*SYSVOL*" CommandLine="*.exe*"
+            (CommandLine="*copy*" OR CommandLine="*xcopy*")
+        | table _time host User CommandLine
+        ```
+
+    === "Cloud keys used from a new IP"
+        ```spl
+        index=aws sourcetype=aws:cloudtrail
+        | stats earliest(_time) AS first_seen values(eventName) AS actions BY userIdentity.accessKeyId sourceIPAddress
+        | where first_seen > relative_time(now(), "-1d")
+        ```
+        Flags an access key appearing from an IP it has never used before.
+
 ---
-## 🏆 Final Verdict
+
+## 🛡️ Case Verdict
 
 <div class="soc-grid">
-  <div class="soc-card soc-case soc-accent-cyan">
+  <div class="soc-card soc-case soc-accent-red">
     <div class="soc-card-body">
-      <div class="soc-card-title">Case Closed</div>
-      <div class="soc-card-desc">
-        The "First Shift" investigation is complete. We have successfully tracked the adversary from the initial phishing email to the final cloud compromise.
-      </div>
-      <div class="soc-pill-row">
-        <span class="soc-pill">Status: Promoted</span>
-        <span class="soc-pill">Score: 100%</span>
-      </div>
+      <div class="soc-card-title">Full Compromise (On-Prem + Cloud)</div>
+      <ul>
+        <li><strong>Ransomware:</strong> BabyLockerKZ (<code>gaze.exe</code>, <code>.danger17</code>)</li>
+        <li><strong>Persistence:</strong> Run key + scheduled task <code>LanguageSync</code></li>
+        <li><strong>Cloud:</strong> AWS keys from <code>cloud-keys.csv</code> used to steal S3 backups</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="soc-card soc-case soc-accent-green">
+    <div class="soc-card-body">
+      <div class="soc-card-title">Remediation Steps</div>
+      <ul>
+        <li>Disable and rotate the AWS keys; review CloudTrail for every action taken with them.</li>
+        <li>Remove <code>gaze.exe</code> from SYSVOL, the Run key and the <code>LanguageSync</code> task.</li>
+        <li>Restore from offline backups, and store backups where domain or cloud admin keys cannot delete them.</li>
+        <li>Move secrets out of file shares into a secrets manager.</li>
+      </ul>
     </div>
   </div>
 </div>

@@ -10,14 +10,21 @@ hide:
 <div class="soc-pill-row" style="margin-bottom: 1.2rem;">
   <span class="soc-pill">Tool: Plistutil / Sqlite3</span>
   <span class="soc-pill">Tactic: Collection</span>
-  <span class="soc-pill">Technique: TCC Bypass</span>
+  <span class="soc-pill">Persistence: LaunchAgent</span>
 </div>
 
 <span class="soc-muted">
-Investigating the MacBook of the CEO. We analyze Safari artifacts, Installation receipts, and the TCC database to track data exfiltration on macOS.
+Investigating the CEO's MacBook. I analysed Safari artefacts, installer receipts and the TCC database to track data theft on macOS.
 </span>
 
 </div>
+
+!!! abstract "Summary"
+    **What happened:** On 2025-07-04 the CEO installed `DevelopAIInstaller.pkg` from `developai.thm`. The fake app asked for TCC access to the Desktop folder first, used a bash script to POST files to `c7.macos-updatesupport.info:8080` with curl, and added a LaunchAgent so it runs at every login.
+
+    **Impact:** Ongoing theft of the CEO's files.
+
+    **Key IOCs:** `developai.thm` · `DevelopAIInstaller.pkg` · bundle ID `org.aiArt.DevelopAI` · `c7.macos-updatesupport.info:8080`
 
 !!! failure "🚨 Security Alert: Suspicious macOS Activity"
     **Trigger:** Endpoint detection flagged an unsigned installer requesting broad file system permissions.
@@ -30,7 +37,7 @@ Investigating the MacBook of the CEO. We analyze Safari artifacts, Installation 
 
 ## 📥 Phase 1: Delivery Vector
 
-We began by analyzing Safari's download history (`Downloads.plist`) to identify where the malicious file came from.
+I began with Safari's download history (`Downloads.plist`) to identify where the malicious file came from.
 
 === "Safari Forensics"
     **Action:** Parsing `~/Library/Safari/Downloads.plist` to view file origin metadata.
@@ -38,23 +45,19 @@ We began by analyzing Safari's download history (`Downloads.plist`) to identify 
     ![Safari Downloads](./assets/task-6/task%206-1.png)
 
 === "Findings"
-    **Question 1:** What was the website from which the user downloaded the malicious application's installer?
-    
     **Evidence:** The `DownloadEntryURL` field points to a suspicious internal domain simulating a software vendor.
     
-    **Answer:** `developai.thm`
-    
-    **Question 2:** What is the name of the malicious application's installer?
+    **Finding:** `developai.thm`
     
     **Evidence:** The `DownloadEntryPath` shows the file saved to disk.
     
-    **Answer:** `DevelopAIInstaller.pkg`
+    **Finding:** `DevelopAIInstaller.pkg`
 
 ---
 
 ## ⏱️ Phase 2: Installation Timeline
 
-To determine exactly when the compromise occurred, we checked the macOS package receipts.
+To find exactly when the compromise happened, I checked the macOS package receipts.
 
 === "Package Receipts"
     **Action:** Parsing `/private/var/db/receipts/com.developai.app.plist` using `plistutil`.
@@ -62,17 +65,15 @@ To determine exactly when the compromise occurred, we checked the macOS package 
     ![Install Receipt](./assets/task-6/task%206-2.png)
 
 === "Timestamp"
-    **Question:** When was the malicious application installed in the system?
+    **Evidence:** The `InstallDate` key records exactly when the package was installed.
     
-    **Evidence:** The `InstallDate` key provides the precise timestamp of execution.
-    
-    **Answer:** `2025-07-04 10:09:03`
+    **Finding:** `2025-07-04 10:09:03`
 
 ---
 
 ## 🔓 Phase 3: Permissions (TCC)
 
-MacOS uses TCC (Transparency, Consent, and Control) to manage permissions. We analyzed the TCC database to see what access the malware requested.
+macOS uses TCC (Transparency, Consent and Control) to control which apps can reach private folders. I queried the TCC database to see what access the malware asked for. No bypass was needed: the app simply asked, and the user clicked Allow.
 
 === "TCC Database"
     **Action:** Querying `TCC.db` to view the `access` table for the malicious bundle identifier `org.aiArt.DevelopAI`.
@@ -80,17 +81,15 @@ MacOS uses TCC (Transparency, Consent, and Control) to manage permissions. We an
     ![TCC Database](./assets/task-6/task%206-3.png)
 
 === "Access Requests"
-    **Question:** Which TCC permission did the application request first?
-    
     **Evidence:** The earliest timestamped request (at 10:10:33) corresponds to the **Desktop Folder** access.
     
-    **Answer:** `kTCCServiceSystemPolicyDesktopFolder`
+    **Finding:** `kTCCServiceSystemPolicyDesktopFolder`
 
 ---
 
 ## 📡 Phase 4: Exfiltration & C2
 
-We examined the application's internal scripts to find the exfiltration logic.
+I examined the application's internal scripts to find the exfiltration logic.
 
 === "Script Analysis"
     **Action:** Analyzing the bash script found within the application resources revealed the C2 server.
@@ -98,17 +97,15 @@ We examined the application's internal scripts to find the exfiltration logic.
     ![Malicious Script](./assets/task-6/task%206-4.png)
 
 === "C2 Infrastructure"
-    **Question:** What is the full C2 URL to which the application exfiltrated data?
-    
     **Evidence:** The variable `LR` defines the remote server receiving the stolen data via `curl` POST requests.
     
-    **Answer:** `http://c7.macos-updatesupport.info:8080`
+    **Finding:** `http://c7.macos-updatesupport.info:8080`
 
 ---
 
 ## 🔄 Phase 5: Persistence
 
-Finally, we identified how the malware ensured it would run every time the user logged in.
+Finally, I identified how the malware ensured it would run every time the user logged in.
 
 === "Launch Agents"
     **Action:** Listing the contents of `~/Library/LaunchAgents/` revealed a suspicious property list and script.
@@ -116,27 +113,93 @@ Finally, we identified how the malware ensured it would run every time the user 
     ![LaunchAgent](./assets/task-6/task%206-5.png)
 
 === "Mechanism"
-    **Question:** Which persistence mechanism did the application use?
-    
     **Evidence:** The presence of a `.plist` file in `Library/LaunchAgents` confirms the persistence method.
     
-    **Answer:** `LaunchAgent`
+    **Finding:** `LaunchAgent`
 
 ---
 
-## 🏁 Operation Complete
+## 🔔 Detection Opportunities
+
+!!! example "Detections I would add"
+    These are example queries; index and field names depend on your environment.
+
+    === "New LaunchAgent"
+        ```yaml
+        title: LaunchAgent plist created by non-Apple process
+        logsource: { product: macos, category: file_event }
+        detection:
+          selection:
+            TargetFilename|contains: '/Library/LaunchAgents/'
+            TargetFilename|endswith: '.plist'
+          condition: selection
+        level: medium
+        ```
+
+    === "Script uploading files with curl"
+        ```yaml
+        title: curl uploading files from a macOS shell script
+        logsource: { product: macos, category: process_creation }
+        detection:
+          selection:
+            Image|endswith: '/curl'
+            CommandLine|contains: ['-F ', '--data-binary', '-T ']
+            ParentImage|endswith: ['/bash', '/sh', '/zsh']
+          condition: selection
+        level: high
+        ```
+
+    === "Unexpected TCC grants"
+        ```bash
+        sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
+          "SELECT service, client, auth_value, datetime(last_modified,'unixepoch')
+           FROM access ORDER BY last_modified DESC LIMIT 20;"
+        ```
+        A quick hunt query: list the newest permission grants and check each app is expected.
+
+---
+
+## 🛡️ Case Verdict
 
 <div class="soc-grid">
+  <div class="soc-card soc-case soc-accent-red">
+    <div class="soc-card-body">
+      <div class="soc-card-title">macOS Findings</div>
+      <ul>
+        <li><strong>Delivery:</strong> Fake AI installer <code>DevelopAIInstaller.pkg</code> from <code>developai.thm</code></li>
+        <li><strong>Access:</strong> User-approved TCC access to Desktop and other folders</li>
+        <li><strong>Exfiltration:</strong> curl POSTs to <code>c7.macos-updatesupport.info:8080</code></li>
+        <li><strong>Persistence:</strong> LaunchAgent in <code>~/Library/LaunchAgents</code></li>
+      </ul>
+    </div>
+  </div>
+
   <div class="soc-card soc-case soc-accent-green">
     <div class="soc-card-body">
-      <div class="soc-card-title">🎉 Mission Accomplished</div>
-      <div class="soc-card-desc">
-        Excellent work, Analyst. You have successfully reconstructed the entire attack chain:
-      </div>
+      <div class="soc-card-title">Remediation</div>
       <ul>
-        <li><strong>Linux:</strong> SSH Brute Force & Web Shell</li>
-        <li><strong>Windows:</strong> Lateral Movement & Ransomware</li>
-        <li><strong>MacOS:</strong> Data Exfiltration & Spyware</li>
+        <li>Remove the app and LaunchAgent, and reset its TCC grants with <code>tccutil reset All org.aiArt.DevelopAI</code>.</li>
+        <li>Block the C2 domain and the download site.</li>
+        <li>Allow only signed, notarised apps through MDM.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+---
+
+## 🏁 Full Attack Chain
+
+<div class="soc-grid">
+  <div class="soc-card soc-case soc-accent-cyan">
+    <div class="soc-card-body">
+      <div class="soc-card-title">Operation Honeynet Collapse: Summary</div>
+      <ul>
+        <li><strong>Linux:</strong> WordPress brute force &rarr; web shell &rarr; root via leaked SSH key</li>
+        <li><strong>Windows:</strong> RDP with stolen credentials &rarr; Meterpreter &rarr; LSASS dump &rarr; PsExec</li>
+        <li><strong>Data theft:</strong> CRM export sent to Mega with Rclone</li>
+        <li><strong>Impact:</strong> BlackLock ransomware (<code>.EeUfy</code>)</li>
+        <li><strong>macOS:</strong> Fake AI app stealing files from the CEO's laptop</li>
       </ul>
     </div>
   </div>

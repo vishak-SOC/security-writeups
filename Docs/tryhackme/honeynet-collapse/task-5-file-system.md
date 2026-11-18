@@ -14,10 +14,17 @@ hide:
 </div>
 
 <span class="soc-muted">
-Analyzing the Master File Table (MFT) and file system artifacts to reconstruct the ransomware deployment. We trace the payload from download to execution and encryption.
+Analyzing the Master File Table (MFT) and file system artifacts to reconstruct the ransomware deployment. I traced the payload from download to execution and encryption.
 </span>
 
 </div>
+
+!!! abstract "Summary"
+    **What happened:** `HiddenFile.zip` was downloaded from `gofile.io`, giving the ransomware `pb.exe`. `HpAgent.exe` then encrypted user files with the `.EeUfy` extension and dropped `README.txt` ransom notes. The note's onion site and format match the BlackLock ransomware group.
+
+    **Impact:** Files encrypted across the host, on top of the data already stolen (double extortion).
+
+    **Key IOCs:** `store5.gofile.io/.../HiddenFile.zip` · `pb.exe` · `HpAgent.exe` · `.EeUfy`
 
 !!! failure "🚨 Security Alert: Ransomware Detonation"
     **Trigger:** Widespread file modification and creation of ransom notes detected across the file system.
@@ -30,7 +37,7 @@ Analyzing the Master File Table (MFT) and file system artifacts to reconstruct t
 
 ## 📥 Phase 1: Delivery & Download
 
-We started by parsing the `$MFT` (Master File Table) using `MFTECmd` to find evidence of file downloads. The `Zone.Identifier` Alternate Data Stream (ADS) often contains the source URL of downloaded files.
+I started by parsing the `$MFT` (Master File Table) using `MFTECmd` to find evidence of file downloads. Windows adds a `Zone.Identifier` alternate data stream (the "Mark of the Web") to downloaded files, and it often records the source URL.
 
 === "MFT Parsing"
     **Action:** Processing the MFT to extract metadata about recently created files.
@@ -38,19 +45,17 @@ We started by parsing the `$MFT` (Master File Table) using `MFTECmd` to find evi
     ![MFTECmd Execution](./assets/task-5/task5-1.png)
 
 === "Source Identification"
-    **Question:** What is the full URL from which the ransomware was downloaded to the system?
-    
     **Evidence:** The `Zone.Identifier` contents for a suspicious zip file reveal it was downloaded from a file-sharing site.
     
     ![Zone Identifier](./assets/task-5/task5-2.png)
     
-    **Answer:** `https://store5.gofile.io/download/web/e23cb33f-0e4d-4a5f-8c55-ea2d78057d40/HiddenFile.zip`
+    **Finding:** `https://store5.gofile.io/download/web/e23cb33f-0e4d-4a5f-8c55-ea2d78057d40/HiddenFile.zip`
 
 ---
 
 ## 🎭 Phase 2: Payload Identification
 
-After downloading the archive, the attacker extracted and renamed the executable to blend in. We used timeline analysis to find the original filename.
+After downloading the archive, the attacker extracted and renamed the executable to blend in. I used timeline analysis to find the original filename.
 
 === "File Timeline"
     **Action:** Analyzing the creation events in the download directory.
@@ -58,11 +63,9 @@ After downloading the archive, the attacker extracted and renamed the executable
     ![Original Filename](./assets/task-5/task5-3.png)
 
 === "Findings"
-    **Question:** What was the original file name of the ransomware executable downloaded to the host?
-    
     **Evidence:** The file timeline shows the creation of `pb.exe` immediately following the download.
     
-    **Answer:** `pb.exe`
+    **Finding:** `pb.exe`
 
 ---
 
@@ -76,17 +79,15 @@ The attacker did not run `pb.exe` directly for the encryption phase. Instead, th
     ![Execution Process](./assets/task-5/task5-4.png)
 
 === "Process ID"
-    **Question:** Which executable file initiated the encryption process on the system?
-    
     **Evidence:** The timeline shows `HpAgent.exe` active exactly when the files began to be modified.
     
-    **Answer:** `HpAgent.exe`
+    **Finding:** `HpAgent.exe`
 
 ---
 
 ## 🔒 Phase 4: Impact Analysis
 
-We examined the file system to determine the scope of the damage and the specific indicators of compromise (IOCs).
+I examined the file system to determine the scope of the damage and the specific indicators of compromise (IOCs).
 
 === "Encrypted Files"
     **Action:** Listing files in the user's directory revealed the extension appended by the malware.
@@ -94,17 +95,15 @@ We examined the file system to determine the scope of the damage and the specifi
     ![Encrypted Extension](./assets/task-5/task5-5.png)
 
 === "Extension"
-    **Question:** What file extension was appended to the encrypted files?
-    
     **Evidence:** All user files have been renamed with the `.EeUfy` extension.
     
-    **Answer:** `EeUfy`
+    **Finding:** `EeUfy`
 
 ---
 
 ## 🏴‍☠️ Phase 5: Attribution
 
-Finally, we analyzed the ransom note left behind to identify the threat actor.
+Finally, I analysed the ransom note to identify the group behind the attack.
 
 === "Ransom Note"
     **Action:** Opening the `README.txt` file found in the encrypted directories.
@@ -112,11 +111,40 @@ Finally, we analyzed the ransom note left behind to identify the threat actor.
     ![Ransom Note](./assets/task-5/task5-6.png)
 
 === "Group Identity"
-    **Question:** Go beyond the obvious - which ransomware group targeted the organisation?
-    
     **Evidence:** The onion URL and the specific formatting of the note are characteristic of the **BlackLock** ransomware group.
     
-    **Answer:** `BlackLock`
+    **Finding:** `BlackLock`
+
+---
+
+## 🔔 Detection Opportunities
+
+!!! example "Detections I would add"
+    These are example queries; index and field names depend on your environment.
+
+    === "Mass file renames"
+        ```spl
+        index=sysmon EventCode=11 TargetFilename="*.EeUfy"
+        | bin _time span=1m
+        | stats count BY _time host Image
+        | where count > 100
+        ```
+        In practice, alert on any process creating hundreds of files with the same new extension in a minute.
+
+    === "Executables from file-sharing sites"
+        ```spl
+        index=sysmon EventCode=15
+            (Contents="*gofile.io*" OR Contents="*mega.nz*" OR Contents="*transfer.sh*")
+        | table _time host TargetFilename Contents
+        ```
+        Sysmon Event 15 captures `Zone.Identifier` streams, including the download URL.
+
+    === "Ransom notes appearing"
+        ```spl
+        index=sysmon EventCode=11 TargetFilename="*\\README.txt"
+        | stats dc(TargetFilename) AS notes BY host Image
+        | where notes > 20
+        ```
 
 ---
 
@@ -128,7 +156,7 @@ Finally, we analyzed the ransom note left behind to identify the threat actor.
       <div class="soc-card-title">Ransomware Profile</div>
       <ul>
         <li><strong>Group:</strong> BlackLock</li>
-        <li><strong>Payload:</strong> HpAgent.exe (renamed/injected)</li>
+        <li><strong>Payload:</strong> <code>pb.exe</code> from <code>HiddenFile.zip</code>; encryption run by <code>HpAgent.exe</code></li>
         <li><strong>Extension:</strong> .EeUfy</li>
         <li><strong>Delivery:</strong> Gofile.io (Manual Download)</li>
       </ul>
@@ -137,9 +165,9 @@ Finally, we analyzed the ransom note left behind to identify the threat actor.
 
   <div class="soc-card soc-case soc-accent-green">
     <div class="soc-card-body">
-      <div class="soc-card-title">Investigation Status</div>
+      <div class="soc-card-title">Remediation & Next Steps</div>
       <div class="soc-card-desc">
-        The ransomware attack is fully mapped. The final task is to investigate the <strong>MacOS</strong> laptop to see if any data was exfiltrated there as well.
+        Isolate affected hosts, restore from offline backups, block <code>gofile.io</code> downloads, and hunt for <code>HpAgent.exe</code> and <code>.EeUfy</code> files on every endpoint. The final step is the CEO's <strong>macOS</strong> laptop, to check for further data theft.
       </div>
     </div>
   </div>

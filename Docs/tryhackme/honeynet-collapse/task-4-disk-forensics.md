@@ -14,10 +14,17 @@ hide:
 </div>
 
 <span class="soc-muted">
-Investigating the disk image of the compromised workstation. We analyze user artifacts to identify the account used for lateral movement and the tools used to steal sensitive CRM data.
+Investigating the disk image of the compromised workstation. I analysed user artefacts to identify the account used for lateral movement and the tools used to steal sensitive CRM data.
 </span>
 
 </div>
+
+!!! abstract "Summary"
+    **What happened:** The attacker used `matthew.collins` to open a PowerShell session for about 57 minutes, downloaded Rclone from `167.172.41.141` and uploaded a CRM user export to an attacker-controlled Mega account.
+
+    **Impact:** Exfiltration of employee personal data (names, emails) from the CRM.
+
+    **Key IOCs:** `167.172.41.141` · `rclone-v1.70.2-windows-amd64` · `mega.conf`
 
 !!! failure "🚨 Security Alert: Data Exfiltration Detected"
     **Trigger:** High-volume outbound traffic detected from a workstation to a known cloud storage provider.
@@ -30,10 +37,10 @@ Investigating the disk image of the compromised workstation. We analyze user art
 
 ## 👤 Phase 1: User Forensic Analysis
 
-We began by analyzing the `NTUSER.DAT` hive and PowerShell history files to determine which account was compromised and how long the attacker was active.
+I began with the `NTUSER.DAT` hive and PowerShell history files to determine which account was compromised and how long the attacker was active.
 
 === "Account Identification"
-    **Action:** We located the PowerShell command history file (`ConsoleHost_history.txt`). The directory path clearly indicates the user profile in use.
+    **Action:** I located the PowerShell history file (`ConsoleHost_history.txt`). Its path shows which user profile ran the commands.
     
     ![Console Host Path](./assets/task-4/task4-1.png)
 
@@ -43,16 +50,11 @@ We began by analyzing the `NTUSER.DAT` hive and PowerShell history files to dete
     ![Registry UserAssist](./assets/task-4/task4-2.png)
 
 === "Findings"
-    **Question 1:** Which domain account was used to initiate the remote session onto the host?
-    
-    **Answer:** `matthew.collins` (Confirmed by file path `C:\Users\matthew.collins\...`)
-    
-    **Question 2:** For how many seconds did the attacker maintain their PowerShell session active?
-    
-    **Evidence:** The Focus Time shows `0d, 0h, 57m, 35s`.
-    *Calculation:* (57 * 60) + 35 = **3455** seconds.
-    
-    **Answer:** `3455`
+    **Account used:** `matthew.collins`, the account whose hash was dumped on the previous host (path `C:\Users\matthew.collins\...`).
+
+    **PowerShell session length:** UserAssist records a focus time of `0d, 0h, 57m, 35s` for `powershell.exe`, which is (57 × 60) + 35 = **3455 seconds**.
+
+    Focus time counts how long the window was in the foreground, so it is a close estimate of hands-on-keyboard time rather than an exact session length.
 
 ---
 
@@ -66,41 +68,35 @@ The PowerShell history revealed the commands used to download exfiltration tools
     ![C2 Download History](./assets/task-4/task4-3.png)
 
 === "Findings"
-    **Question 3:** What was the attacker's C2 IP address used for staging and exfiltration?
-    
     **Evidence:** The URL `http://167.172.41.141/rclone...` was used to download the malicious toolkit.
     
-    **Answer:** `167.172.41.141`
-    
-    **Question 4:** Which well-known tool was used to exfiltrate the collected data?
+    **Finding:** `167.172.41.141`
     
     **Evidence:** The filename `rclone-v1.70.2-windows-amd64` confirms the use of **Rclone**, a command-line program to manage files on cloud storage.
     
-    **Answer:** `Rclone`
+    **Finding:** `Rclone`
 
 ---
 
 ## ☁️ Phase 3: Exfiltration Configuration
 
-We examined the configuration files left behind by the attacker to understand where the data was sent.
+I examined the configuration files left behind by the attacker to understand where the data was sent.
 
 === "Rclone Config"
-    **Action:** We found a config file named `mega.conf` inside the staging directory, utilized by Rclone to authenticate with the cloud provider.
+    **Action:** I found `mega.conf` in the staging directory, used by Rclone to authenticate with the cloud provider.
     
     ![Mega Config](./assets/task-4/task4-4.png)
 
 === "Credentials"
-    **Question:** What is the obscured password to the attacker-controlled Mega?
+    **Evidence:** The config holds the password for the `mega` remote in Rclone's "obscured" format. This is encoding, not encryption: `rclone reveal` turns it back into plain text, so investigators can log in to the attacker's account and see what was uploaded.
     
-    **Evidence:** The config file contains an obfuscated password string for the `mega` remote type.
-    
-    **Answer:** `yWKgVA7Rv1iIoG-VWAr7NAFbwKHNiMZGNybJ4QybJHtiFg`
+    **Finding:** `yWKgVA7Rv1iIoG-VWAr7NAFbwKHNiMZGNybJ4QybJHtiFg`
 
 ---
 
 ## 📉 Phase 4: Impact Assessment
 
-Finally, we analyzed the staged files to determine exactly what data was stolen from the CRM system.
+Finally, I analysed the staged files to determine exactly what data was stolen from the CRM system.
 
 === "Stolen Data"
     **Action:** Opening the `Users_export` file found in the staging folder revealed a list of employee details.
@@ -108,11 +104,44 @@ Finally, we analyzed the staged files to determine exactly what data was stolen 
     ![Exfiltrated Data](./assets/task-4/task4-5.png)
 
 === "Victim Identification"
-    **Question:** What is Lucas's email address found in the exfiltrated data?
-    
     **Evidence:** The CSV export lists user details, specifically the entry for `Lucas Rivera`.
     
-    **Answer:** `lucas.rivera@deceptitech.thm`
+    **Finding:** `lucas.rivera@deceptitech.thm`
+
+---
+
+## 🔔 Detection Opportunities
+
+!!! example "Detections I would add"
+    These are example queries; index and field names depend on your environment.
+
+    === "Rclone execution"
+        ```yaml
+        title: Rclone used to copy data to cloud storage
+        logsource: { product: windows, category: process_creation }
+        detection:
+          selection_name:
+            - Image|endswith: '\rclone.exe'
+            - OriginalFileName: 'rclone.exe'
+          selection_renamed:
+            CommandLine|contains|all: ['--config', 'mega']
+          condition: selection_name or selection_renamed
+        level: high
+        ```
+
+    === "Tools downloaded by PowerShell"
+        ```spl
+        index=wineventlog EventCode=4104 ScriptBlockText="*Invoke-WebRequest*"
+        | rex field=ScriptBlockText "(?<url>https?://[^\s'\"]+)"
+        | table _time host user url
+        ```
+
+    === "Traffic to file-sharing sites"
+        ```spl
+        index=proxy (dest_host="*mega.nz" OR dest_host="*mega.co.nz" OR dest_host="*mega.io")
+        | stats sum(bytes_out) AS bytes_out BY src_ip user
+        | where bytes_out > 50000000
+        ```
 
 ---
 
@@ -132,9 +161,9 @@ Finally, we analyzed the staged files to determine exactly what data was stolen 
 
   <div class="soc-card soc-case soc-accent-green">
     <div class="soc-card-body">
-      <div class="soc-card-title">Investigation Status</div>
+      <div class="soc-card-title">Remediation & Next Steps</div>
       <div class="soc-card-desc">
-        We have confirmed data theft. We must now analyze the File System (Task 5) to find the ransomware payload itself.
+        Data theft is confirmed: the CRM user export was sent to Mega. Block <code>167.172.41.141</code> and Mega domains, disable <code>matthew.collins</code>, and prepare a breach notification for the exposed employees. The file system is analysed next to find the ransomware itself.
       </div>
     </div>
   </div>

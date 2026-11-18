@@ -14,10 +14,17 @@ hide:
 </div>
 
 <span class="soc-muted">
-Analyzing a Man-in-the-Middle (MITM) attack. We detected ARP poisoning used to intercept traffic, captured cleartext credentials in transit, and identified a stealthy DNS exfiltration tunnel.
+Analysing a man-in-the-middle (MITM) attack. I found ARP poisoning used to intercept traffic, recovered cleartext credentials from the capture and identified a DNS exfiltration tunnel.
 </span>
 
 </div>
+
+!!! abstract "Summary"
+    **What happened:** A host with MAC `00:0c:29:11:22:33` poisoned ARP caches to impersonate the gateway (`10.10.10.1`), intercepted a cleartext HTTP login for `dev_user`, kept a reverse shell open from `10.10.10.100` and pushed data out through 500+ DNS queries to `exfil-domain.xyz`.
+
+    **Impact:** Developer credentials stolen; data exfiltrated over DNS.
+
+    **Key IOCs:** MAC `00:0c:29:11:22:33` · `10.10.10.100` · `exfil-domain.xyz` · User-Agent `CVE-202X-EXPLOIT`
 
 !!! failure "🚨 IDS Alert: Suspicious Outbound Traffic"
     **Trigger:** Network IDS flagged a "Reverse Shell Outbound Connection" and anomalous ARP broadcasts.
@@ -58,14 +65,14 @@ With the traffic intercepted, the attacker captured unencrypted POST requests co
     **Target:** Jira Instance
     **User-Agent:** `CVE-202X-EXPLOIT`
     
-    The attacker used a specifically crafted User-Agent, likely to trigger a known vulnerability or bypass filters.
+    The User-Agent string names an exploit outright. Real attackers usually hide behind normal browser strings, so a value like this is a gift to defenders: a simple User-Agent watchlist would catch it.
     
     ![User Agent Stats](./assets/task-7/task-7-3.png)
 
 === "2. Cleartext Creds"
     **PCAP Analysis:** Follow TCP Stream (Port 80).
     
-    We recovered the following credentials from a captured HTTP POST request:
+    I recovered the following credentials from a captured HTTP POST request:
     
     * **URL:** `http://internal.login.local/login.php`
     * **Payload:** `username=dev_user&password=SecretPassword!`
@@ -76,13 +83,15 @@ With the traffic intercepted, the attacker captured unencrypted POST requests co
 
 ## 📤 Phase 3: C2 & Exfiltration
 
-Finally, we analyzed how the attacker communicated externally and stole data.
+Finally, I analysed how the attacker communicated externally and stole data.
 
 === "1. Reverse Shell"
     **IDS Alert:** `Reverse Shell Outbound Connection Detected`
     
     * **Source:** `10.10.10.100`
     * **Destination:** `1.1.1.1` (Port 8080)
+
+    In the real world `1.1.1.1` is Cloudflare's public DNS resolver, so traffic to it on a non-DNS port like 8080 stands out as abnormal.
     
     This confirms the attacker has a live interactive session on the host.
     
@@ -91,12 +100,44 @@ Finally, we analyzed how the attacker communicated externally and stole data.
 === "2. DNS Exfiltration"
     **Protocol:** DNS Tunneling
     
-    We detected high-frequency DNS queries to a suspicious domain. This technique hides data inside the subdomains of DNS requests (e.g., `encoded-data.exfil-domain.xyz`).
+    I found high-frequency DNS queries to a suspicious domain. This technique hides data inside the subdomains of DNS requests (e.g., `encoded-data.exfil-domain.xyz`).
     
     * **Exfil Domain:** `exfil-domain.xyz`
     * **Count:** 500+ Queries
     
     ![Splunk DNS Logs](./assets/task-7/task-7-6.png)
+
+---
+
+## 🔔 Detection Opportunities
+
+!!! example "Detections I would add"
+    These are example queries; index and field names depend on your environment.
+
+    === "ARP spoofing"
+        ```spl
+        index=* log_type=arp
+        | stats dc(sender_mac) AS macs values(sender_mac) AS mac_list BY sender_ip
+        | where macs > 1
+        ```
+        One IP announced by more than one MAC address is the classic ARP poisoning signal.
+
+    === "DNS tunnelling"
+        ```spl
+        index=dns
+        | rex field=query "^(?<sub>.+)\.(?<domain>[^.]+\.[^.]+)$"
+        | eval sub_len=len(sub)
+        | stats count avg(sub_len) AS avg_len dc(sub) AS unique_subs BY src_ip domain
+        | where count > 100 AND (avg_len > 30 OR unique_subs > 50)
+        ```
+        Lots of long, unique subdomains for one parent domain points to data hidden in DNS.
+
+    === "Cleartext logins"
+        ```spl
+        index=network dest_port=80 http_method=POST
+            (form_data="*password=*" OR uri_path="*login*")
+        | table _time src_ip dest_ip uri_path
+        ```
 
 ---
 
@@ -120,7 +161,9 @@ Finally, we analyzed how the attacker communicated externally and stole data.
       <ul>
         <li>Enable <strong>Dynamic ARP Inspection (DAI)</strong> on switches.</li>
         <li>Force HTTPS for all internal login pages.</li>
-        <li>Block the domain <code>exfil-domain.xyz</code> at the DNS resolver.</li>
+        <li>Reset <code>dev_user</code> and isolate <code>10.10.10.100</code>.</li>
+        <li>Block <code>exfil-domain.xyz</code> at the DNS resolver and only allow DNS through internal resolvers.</li>
+        <li>Patch the Jira instance against the exploited CVE.</li>
       </ul>
     </div>
   </div>

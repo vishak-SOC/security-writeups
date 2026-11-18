@@ -165,8 +165,8 @@ hide:
   </div>
   <p class="briefing-text">
     Anomalous authentication events have been detected originating from unusual geolocations. 
-    Simultaneously, users are reporting suspicious emails. As the <b>Junior Security Analyst</b>, 
-    your objective is to correlate these events, analyze the phishing payloads, and determine if the network has been breached.
+    Simultaneously, users are reporting suspicious emails. As the <b>junior security analyst</b>, 
+    my objective was to correlate these events, analyse the phishing payloads and decide whether the network had been breached.
   </p>
   <div class="status-line">
     <span>● CLASSIFICATION: CONFIDENTIAL</span>
