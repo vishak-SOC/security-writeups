@@ -1,7 +1,7 @@
 site_name: Security Writeups
 site_description: A portfolio of SOC-style security investigations, featuring full kill-chain analysis and network forensics.
-# ✅ UPDATED WITH YOUR URL
 site_url: https://vishak-SOC.github.io/security-writeups/
+docs_dir: Docs
 
 theme:
   name: material
@@ -51,8 +51,6 @@ markdown_extensions:
   - tables
 
 nav:
-  
-  # 2. Your Case Studies
   - Investigations:
       - First Shift (Case Study):
           - Dashboard: tryhackme/first-shift/index.md
